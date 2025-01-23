@@ -9,7 +9,6 @@ import {
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 const CustomSidebarMenu = async (props) => {
 
   const storedFullname = await AsyncStorage.getItem('user_fullname');
