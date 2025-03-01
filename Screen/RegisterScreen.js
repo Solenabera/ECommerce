@@ -1,4 +1,4 @@
-import React, {useState, createRef} from 'react';
+import React, { useState, createRef } from 'react';
 import {
   StyleSheet,
   TextInput,
@@ -12,10 +12,11 @@ import {
 } from 'react-native';
 
 import Loader from './Components/Loader';
-import { API_URL } from '@env';
+import { API_URL, PORT } from '@env';
 
 const RegisterScreen = (props) => {
   const [firstName, setFirstName] = useState('');
+  const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,6 +30,7 @@ const RegisterScreen = (props) => {
   ] = useState(false);
 
   const firstNameInputRef = createRef();
+  const middleNameInputRef = createRef();
   const lastNameInputRef = createRef();
   const emailInputRef = createRef();
   const passwordInputRef = createRef();
@@ -56,7 +58,7 @@ const RegisterScreen = (props) => {
       alert('Please fill Confirm Password');
       return;
     }
-    if(password != confirmPassword){
+    if (password != confirmPassword) {
       alert("Password Mis-match");
       return;
     }
@@ -64,10 +66,13 @@ const RegisterScreen = (props) => {
     setLoading(true);
 
     var dataToSend = {
-      fullname: firstName + " " + lastName,
+      firstName: firstName,
+      middleName: middleName,
+      lastName: lastName,
       email: email,
-      password: password ,
+      password: password,
     };
+
     var formBody = [];
     for (var key in dataToSend) {
       var encodedKey = encodeURIComponent(key);
@@ -76,25 +81,21 @@ const RegisterScreen = (props) => {
     }
     formBody = formBody.join('&');
 
-    fetch(API_URL + '/signup_user', {
+    fetch(API_URL + ":" + PORT + '/signup_user', {
       method: 'POST',
       body: formBody,
       headers: {
         'Content-Type':
-        'application/x-www-form-urlencoded;charset=UTF-8',
+          'application/x-www-form-urlencoded;charset=UTF-8',
       },
     })
       .then((response) => response.json())
       .then((responseJson) => {
         setLoading(false);
-        console.log(responseJson);
         if (responseJson.status === 'success') {
           setIsRegistraionSuccess(true);
-          console.log(
-            'Registration Successful. Please Login to proceed'
-          );
         } else {
-          setErrortext(responseJson.msg);
+          setErrortext(responseJson.message);
         }
       })
       .catch((error) => {
@@ -131,7 +132,7 @@ const RegisterScreen = (props) => {
     );
   }
   return (
-    <View style={{flex: 1, backgroundColor: '#307ecc'}}>
+    <View style={{ flex: 1, backgroundColor: '#307ecc' }}>
       <Loader loading={loading} />
       <ScrollView
         keyboardShouldPersistTaps="handled"
@@ -162,6 +163,21 @@ const RegisterScreen = (props) => {
               returnKeyType="next"
               onSubmitEditing={() =>
                 firstNameInputRef.current && firstNameInputRef.current.focus()
+              }
+              blurOnSubmit={false}
+            />
+          </View>
+          <View style={styles.SectionStyle}>
+            <TextInput
+              style={styles.inputStyle}
+              onChangeText={(middleName) => setMiddleName(middleName)}
+              underlineColorAndroid="#f000"
+              placeholder="MIddle Name"
+              placeholderTextColor="#8b9cb5"
+              autoCapitalize="sentences"
+              returnKeyType="next"
+              onSubmitEditing={() =>
+                middleNameInputRef.current && middleNameInputRef.current.focus()
               }
               blurOnSubmit={false}
             />

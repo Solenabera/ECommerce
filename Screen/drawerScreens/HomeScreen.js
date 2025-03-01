@@ -1,5 +1,11 @@
-import React from 'react';
-import { View, Text, SafeAreaView, FlatList, TouchableOpacity, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, SafeAreaView, FlatList, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import Loader from '../Components/Loader';
+import { IconButton, MD3Colors } from 'react-native-paper';
+import { white } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 const messageExamples = [
   {
@@ -36,7 +42,7 @@ const messageExamples = [
     primary: 'Summer BBQ',
     secondary: 'Who wants to have a cookout this weekend?',
     person: require('../../image/success.png'),
-  },  {
+  }, {
     primary: 'Brunch this week?',
     secondary: "I'll be in the neighbourhood this week. Let's grab a bite to eat",
     person: require('../../image/success.png'),
@@ -74,20 +80,66 @@ const messageExamples = [
 ];
 
 const HomeScreen = () => {
+
+  const [backgroundColor, setBackgroundColor] = useState();
+  const [textColor, setTextColor] = useState();
+  const [loading, setLoading] = useState(false);
+  
+  const fetchThemeMode = async () => {
+    const storedThemeMode = await AsyncStorage.getItem('user_themeMode');
+    const isDarkMode = storedThemeMode === "Dark";
+    const bgColor = isDarkMode ? '#000000' : '#ffffff';
+    const txtColor = isDarkMode ? '#ffffff' : '#000000';
+    setBackgroundColor(bgColor);
+    setTextColor(txtColor);
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchThemeMode();
+    }, [])
+  );
+
   const renderItem = ({ item }) => (
     <TouchableOpacity style={{ flexDirection: 'row', padding: 10, alignItems: 'center' }}>
       <Image source={item.person} style={{ width: 50, height: 50, borderRadius: 25 }} />
-      <View style={{ marginLeft: 10 }}>
-        <Text style={{ fontWeight: 'bold' }}>{item.primary}</Text>
-        <Text>{item.secondary}</Text>
+      <View style={{ marginLeft: 10}}>
+        <Text style={{ fontWeight: 'bold', color: textColor }}>{item.primary}</Text>
+        <Text style={{ color: textColor}}>{item.secondary}</Text>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ flex: 1, padding: 16 }}>
+    
+        <SafeAreaView style={[{ flex: 1 }, { backgroundColor }]}>
+    {/* <SafeAreaView style={{ flex: 1 }}> */}
+
+      <Loader loading={loading} />
+
+      <View style={styles.headerGeneral}>
+        <View style={styles.header}>
+          <IconButton
+            style={styles.backButton}
+            icon="chevron-left"
+            iconColor="#000000"
+            size={25}
+            onPress={() => {
+              if (props.navigation.canGoBack()) {
+                props.navigation.goBack();
+              } else {
+                alert("No previous screen to go back to");
+              }
+            }
+            }>
+          </IconButton>
+        </View>
+        <Text style={styles.headerText}>Home</Text>
+      </View>
+
+      <View style={[styles.mainBody, {backgroundColor}]}>
         <FlatList
+        style={styles.flatListStyle}
           data={messageExamples}
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
@@ -98,3 +150,52 @@ const HomeScreen = () => {
 };
 
 export default HomeScreen;
+
+const styles = StyleSheet.create({
+  mainBody: {
+    padding: 8,
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: '#000000',
+    alignContent: 'center',
+  },
+  headerGeneral: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignContent: 'center',
+    backgroundColor: '#42adf5',
+    height: 30,
+  },
+  header: {
+    position: 'relative',
+    padding: 1,
+    zIndex: 1,
+  },
+  headerText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 600,
+    marginLeft: 10,
+  },
+  backButton: {
+    width: 25,
+    height: 25,
+    borderRadius: 12.5,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    fontWeight: 600,
+  },
+  backButtonText: {
+    color: '#307ecc',
+    fontSize: 20,
+  },
+  flatListStyle: {
+    color: 'white'
+  }
+});

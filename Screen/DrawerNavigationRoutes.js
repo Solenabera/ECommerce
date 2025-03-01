@@ -7,7 +7,7 @@ import {createDrawerNavigator} from '@react-navigation/drawer';
 // Import Screens
 import HomeScreen from '../Screen/drawerScreens/HomeScreen';
 import SettingsScreen from '../Screen/drawerScreens/SettingsScreen';
-import ProfileScreen from '../Screen/drawerScreens/Profile';
+import ProfileScreen from './drawerScreens/ProfileScreen';
 
 import CustomSidebarMenu from './Components/CustomSidebarMenu';
 import NavigationDrawerHeader from './Components/NavigationDrawerHeader';

@@ -1,4 +1,4 @@
-import React, {useState, createRef} from 'react';
+import React, { useState, createRef } from 'react';
 import {
   StyleSheet,
   TextInput,
@@ -15,9 +15,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Loader from './Components/Loader';
 
-import { API_URL } from '@env';
+import { API_URL, PORT } from '@env';
 
-const LoginScreen = ({navigation}) => {
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ const LoginScreen = ({navigation}) => {
 
   const passwordInputRef = createRef();
 
-  const handleSubmitPress = async() => {
+  const handleSubmitPress = async () => {
     setErrortext('');
 
     if (!email) {
@@ -37,9 +37,9 @@ const LoginScreen = ({navigation}) => {
       return;
     }
 
-    setLoading(true);  
+    setLoading(true);
 
-    let dataToSend = {email: email, password: password};
+    let dataToSend = { email: email, password: password };
     let formBody = [];
     for (let key in dataToSend) {
       let encodedKey = encodeURIComponent(key);
@@ -49,14 +49,12 @@ const LoginScreen = ({navigation}) => {
 
     formBody = formBody.join('&');
 
-    console.log(formBody, API_URL)
-
-    fetch('http://192.168.221.132:5000' + '/login_user', {
+    fetch(API_URL + ":" + PORT + '/login_user', {
       method: 'POST',
       body: formBody,
       headers: {
         'Content-Type':
-        'application/x-www-form-urlencoded;charset=UTF-8',
+          'application/x-www-form-urlencoded;charset=UTF-8',
       },
     })
       .then((response) => response.json())
@@ -64,11 +62,14 @@ const LoginScreen = ({navigation}) => {
         setLoading(false);
         if (responseJson.status === 'success') {
           AsyncStorage.setItem('user_id', responseJson.data.email);
-          AsyncStorage.setItem('user_fullname', responseJson.data.fullname);
+          AsyncStorage.setItem('user_firstName', responseJson.data.firstName);
+          AsyncStorage.setItem('user_middleName', responseJson.data.middleName);
+          AsyncStorage.setItem('user_lastName', responseJson.data.lastName);
+          AsyncStorage.setItem('user_themeMode', responseJson.data.themeMode);
           navigation.replace('BottomTabNavigator');
         } else {
           setErrortext(responseJson.message);
-        }        
+        }
       })
       .catch((error) => {
         setLoading(false);

@@ -1,12 +1,14 @@
 import * as React from 'react';
-
+import { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-
 import HomeScreen from '../Screen/drawerScreens/HomeScreen';
 import SettingsScreen from '../Screen/drawerScreens/SettingsScreen';
-import ProfileScreen from '../Screen/drawerScreens/Profile';
+import ProfileScreen from './drawerScreens/ProfileScreen';
+
+import { API_URL, PORT } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const homeName = "Home";
 const profilesName = "Profiles";
@@ -15,6 +17,50 @@ const settingsName = "Settings";
 const Tab = createBottomTabNavigator();
 
 function BottomTabNavigator() {
+
+  const fetchThemeMode = async () => {
+    const storedUsername = await AsyncStorage.getItem('user_id');
+
+    let dataToSend = { email: storedUsername };
+    let formBody = [];
+    for (let key in dataToSend) {
+      let encodedKey = encodeURIComponent(key);
+      let encodedValue = encodeURIComponent(dataToSend[key]);
+      formBody.push(encodedKey + '=' + encodedValue);
+    }
+
+    formBody = formBody.join('&');
+
+    fetch(API_URL + ":" + PORT + '/fetchThemeMode', {
+      method: 'POST',
+      body: formBody,
+      headers: {
+        'Content-Type':
+          'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        if (responseJson.status === 'success') {
+          if (responseJson.data.themeMode) {
+            AsyncStorage.setItem('user_themeMode', responseJson.data.themeMode);
+          }
+          else {
+            AsyncStorage.setItem('user_themeMode', "White");
+          }
+        } else {
+          console.error(responseJson.message);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  useEffect(() => {
+    fetchThemeMode();
+  }, []);
+
   return (
     <Tab.Navigator
       initialRouteName={homeName}
